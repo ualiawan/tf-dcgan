@@ -13,12 +13,13 @@ flags = tf.app.flags
 flags.DEFINE_integer("epochs", 25, "Number of epochs")
 flags.DEFINE_float("learning_rate", 1e-4, "Learning rate of for adam optimizer")
 flags.DEFINE_float("beta1", 0.5, "Momentum term of adam optimizer")
-flags.DEFINE_integer("train_size", np.inf, "The size of train images")
+flags.DEFINE_integer("train_size", sys.maxsize, "The size of train images")
 flags.DEFINE_integer("batch_size", 64, "The number of batch images")
 flags.DEFINE_integer("image_size", 108, "The size of image to use")
 flags.DEFINE_integer("output_size", 64, "The size of the output images")
 flags.DEFINE_integer("sample_size", 64, "The number of sample images")
 flags.DEFINE_integer("c_dim", 3, "Dimension of image color")
+flags.DEFINE_integer("z_dim", 100, "Dimension of input noise vector")
 flags.DEFINE_integer("summary_step", 500, "The interval of generating summary")
 flags.DEFINE_integer("save_step", 500, "The interval of saveing checkpoints")
 flags.DEFINE_string("dataset", "celebA", "The name of dataset")
@@ -50,8 +51,8 @@ def main(_):
         Dz, Dz_logits = network.discriminator(Gz, reuse=True)
         Gz1 =  network.generator(z, is_train=False, reuse=True)
         
-        tf.summary.histogram("d_real", self.D)
-        tf.summary.histogram("d_noise", self.Dz)
+        tf.summary.histogram("d_real", Dx)
+        tf.summary.histogram("d_noise", Dz)
         tf.summary.image("G", Gz1, 10)
 
         d_loss_real = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=Dx_logits, labels=tf.ones_like(Dx)))
@@ -105,7 +106,7 @@ def main(_):
         print("---------------------------------------------")
         print("*************training starting***************")
         print("---------------------------------------------")
-        for epoch in range(FLAGS.epoch):
+        for epoch in range(FLAGS.epochs):
 
             d_total_cost = 0.
             g_total_cost = 0.
