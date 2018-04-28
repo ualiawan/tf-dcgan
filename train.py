@@ -48,7 +48,7 @@ def main(_):
         Gz =  network.generator(z)
         Dx, Dx_logits =  network.discriminator(x)
         Dz, Dz_logits = network.discriminator(Gz, reuse=True)
-        Gz1 =  network.generator(z, is_train=False reuse=True)
+        Gz1 =  network.generator(z, is_train=False, reuse=True)
         
         tf.summary.histogram("d_real", self.D)
         tf.summary.histogram("d_noise", self.Dz)
@@ -124,9 +124,6 @@ def main(_):
                 g_err1, _ = sess.run([g_loss, g_trainer], feed_dict={z: batch_z})
 
                 iteration += 1
-                if batch_i % 10 == 0:
-                    summary = sess.run(merged, feed_dict={x: batch_x, z: batch_z})
-                    summary_writer.add_summary(summary, (epoch-1)*(num_batches/30)+(batch_i/30))
                 
                 print("Epoch: [{:2d}] [{:4d}/{:4d}] time: {:4.4f}, d_loss: {:.8f}, g_loss: {:.8f}".format(
                 	epoch, batch_i, num_batches, time.time() - start_time, d_err, g_err1))
@@ -134,9 +131,9 @@ def main(_):
 
                 if np.mod(iteration, FLAGS.summary_step) == 0:
                 	summary = sess.run(merged, feed_dict={x: batch_x, z: batch_z})
-                    summary_writer.add_summary(summary, iteration)
+                	summary_writer.add_summary(summary, iteration)
 
-	            if np.mod(iteration, FLAGS.save_step) == 0:
+                if np.mod(iteration, FLAGS.save_step) == 0:
 	                # save current network parameters
 	                print("[*] Saving checkpoints...")
 	                pretrain_saver.save(sess, pretrain_saver_path)
